@@ -1,0 +1,44 @@
+trigger:
+- main
+
+variables:
+- group: azure-sp-secrets
+
+stages:
+- stage: Deploy
+  displayName: Deploy to AKS
+  jobs:
+  - job: Deploy
+    displayName: Login to Azure and deploy to AKS
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - checkout: self
+
+    - task: AzureCLI@2
+      displayName: Azure login and kubectl apply
+      inputs:
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Logging into Azure using Service Principal"
+          az login \
+            --service-principal \
+            --username "$AZURE_CLIENT_ID" \
+            --password "$AZURE_CLIENT_SECRET" \
+            --tenant "$AZURE_TENANT_ID"
+
+          echo "Setting subscription"
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+          echo "Fetching AKS credentials"
+          az aks get-credentials \
+            --resource-group devops-aks-rg \
+            --name devops-aks-cluster \
+            --overwrite-existing
+
+          echo "Deploying manifests"
+          kubectl apply -f k8s/
+
+          echo "Deployment complete"
