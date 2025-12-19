@@ -16,29 +16,27 @@ stages:
     steps:
     - checkout: self
 
-    - task: AzureCLI@2
+    - task: CmdLine@2
       displayName: Azure login and kubectl apply
       inputs:
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          echo "Logging into Azure using Service Principal"
-          az login \
-            --service-principal \
-            --username "$AZURE_CLIENT_ID" \
-            --password "$AZURE_CLIENT_SECRET" \
-            --tenant "$AZURE_TENANT_ID"
+        script: |
+          echo Logging into Azure using Service Principal
+          az login ^
+            --service-principal ^
+            -u "%AZURE_CLIENT_ID%" ^
+            -p "%AZURE_CLIENT_SECRET%" ^
+            --tenant "%AZURE_TENANT_ID%"
 
-          echo "Setting subscription"
-          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+          echo Setting subscription
+          az account set --subscription "%AZURE_SUBSCRIPTION_ID%"
 
-          echo "Fetching AKS credentials"
-          az aks get-credentials \
-            --resource-group devops-aks-rg \
-            --name devops-aks-cluster \
+          echo Getting AKS credentials
+          az aks get-credentials ^
+            --resource-group devops-aks-rg ^
+            --name devops-aks-cluster ^
             --overwrite-existing
 
-          echo "Deploying manifests"
+          echo Deploying Kubernetes manifests
           kubectl apply -f k8s/
 
-          echo "Deployment complete"
+          echo Deployment completed
