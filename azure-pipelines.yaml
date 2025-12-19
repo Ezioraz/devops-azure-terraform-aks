@@ -20,23 +20,33 @@ stages:
       displayName: Azure login and kubectl apply
       inputs:
         script: |
-          echo Logging into Azure using Service Principal
+          echo ===============================
+          echo Logging into Azure
+          echo ===============================
           az login ^
             --service-principal ^
-            -u "%AZURE_CLIENT_ID%" ^
-            -p "%AZURE_CLIENT_SECRET%" ^
-            --tenant "%AZURE_TENANT_ID%"
+            -u "$(AZURE_CLIENT_ID)" ^
+            -p "$(AZURE_CLIENT_SECRET)" ^
+            --tenant "$(AZURE_TENANT_ID)"
 
+          echo ===============================
           echo Setting subscription
-          az account set --subscription "%AZURE_SUBSCRIPTION_ID%"
+          echo ===============================
+          az account set --subscription "$(AZURE_SUBSCRIPTION_ID)"
 
-          echo Getting AKS credentials
+          echo ===============================
+          echo Fetching AKS credentials
+          echo ===============================
           az aks get-credentials ^
             --resource-group devops-aks-rg ^
             --name devops-aks-cluster ^
             --overwrite-existing
 
+          echo ===============================
           echo Deploying Kubernetes manifests
+          echo ===============================
           kubectl apply -f k8s/
 
-          echo Deployment completed
+          echo ===============================
+          echo Deployment completed successfully
+          echo ===============================
