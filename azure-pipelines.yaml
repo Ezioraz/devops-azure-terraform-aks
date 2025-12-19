@@ -11,7 +11,7 @@ stages:
   - job: Deploy
     displayName: Login to Azure and deploy to AKS
     pool:
-      vmImage: ubuntu-latest
+      name: self-hosted
 
     steps:
     - checkout: self
